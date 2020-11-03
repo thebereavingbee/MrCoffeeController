@@ -30,8 +30,8 @@ void setup() {
     lcd.begin(16,2);
 }
 
-int maxBrewTime = 30;    //Coffee pot will stay on for 2 hours (72000 seconds)
-int incrementTime = 60;  //30 min (1800 seconds) increment when button is pressed
+int maxBrewTime = 72000;    //Coffee pot will stay on for 2 hours (72000 seconds)
+int incrementTime = 1800;  //30 min (1800 seconds) increment when button is pressed
 
 int millisFactor = 1000;
 int s = 30;                //initial timer value
