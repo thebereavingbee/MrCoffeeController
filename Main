@@ -3,6 +3,8 @@
   Alexander de Dood
   adedood@gmail.com
   
+  Arduino Uno R3
+  
   This project allows automatic brewing of a Mr Coffee coffee maker after a set delay
   Wiring of the relay in this design should be in parrallel to the switch on the front
   of the coffee maker.
