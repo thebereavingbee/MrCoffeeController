@@ -18,38 +18,42 @@
 
 #define RS 12
 #define EN 11
+#define BZ 9
 #define D4 4
 #define D5 5
 #define D6 6
 #define D7 7
 #define RELAY 3
 #define INCREMENT 2
+const int buzzerPin = BZ;
 LiquidCrystal lcd(RS,EN,D4,D5,D6,D7);
 
 void setup() {
+    pinMode(buzzerPin, OUTPUT);
     pinMode(INCREMENT, INPUT);
     pinMode(RELAY,OUTPUT);
     lcd.begin(16,2);
 }
 
-int maxBrewTime = 72000;    //Coffee pot will stay on for 2 hours (72000 seconds)
-int incrementTime = 1800;  //30 min (1800 seconds) increment when button is pressed
+const long maxBrewTime = 14400;    //Coffee pot will stay on for 4 hours (14400 seconds)
+const long brewTime = 16000;         //Estimate the time it takes for a pot to brew, when its ready this will play Vader's theme. (30min = 16000)
+const long incrementTime = 1800;  //30 min (1800 seconds) increment when button is pressed
 
-int millisFactor = 1000;
-int s = 30;                //initial timer value
+const int millisFactor = 1000;
+long s = 30;                //initial timer value
 int scdown;
 int enableBrew = 0;
-
-
+bool music = false;
+int flag = 0;
 void loop() {
   
   if (enableBrew == 0){
     lcd.setCursor(0,0);
     lcd.print("Coffee in:      ");
-    while ((s - (millis()/millisFactor)) >= 1){
+    while ((s - (millis()/millisFactor)) >= 1){       //will wait for delay time s before continuing
       if(digitalRead(INCREMENT) == HIGH){
         s = s+incrementTime;
-        delay(millisFactor);
+        delay(500);
       }
       lcd.setCursor(0,1);
       scdown = s - (millis()/millisFactor);
@@ -59,34 +63,193 @@ void loop() {
       }else{
         lcd.print(scdown);
       }
-    } //countdown to 1
+      lcd.print("sec");
+    }
     enableBrew = 1;
     digitalWrite(RELAY, HIGH);
-  }else {
+  }else {                                                   //starting brew prossess
     if(digitalRead(INCREMENT) == HIGH){                     //Pressing the button will cancel brewing
       lcd.setCursor(0,0);
       lcd.print("Canceled Brew   ");
-      enableBrew = 0;
       digitalWrite(RELAY, LOW);
-      delay(millisFactor);
+      delay(500);
     }
     else{
       if((millis()/millisFactor - s) >= maxBrewTime){       //coffee has brewed until maxBrewTime
         lcd.setCursor(0,0);
-        lcd.print("Coffee Timeout!");
+        lcd.print("Coffee Timeout!!");
         lcd.setCursor(0,1);
-        lcd.print(millis()/millisFactor - s);
+        lcd.print("Coffee Timeout!!");
         digitalWrite(RELAY,LOW);
-        enableBrew = 0;
+        flag = 2;
       }
-      else{                                                 //Coffee is brewing
+      else if(flag == 0){                                                 //Coffee is brewing
         lcd.setCursor(0,0);
         lcd.print("Brewing Coffee!");
         lcd.setCursor(0,1);
         lcd.print(millis()/millisFactor - s);
+        lcd.print("/");
+        lcd.print(brewTime);
+        lcd.print(" ");
+        lcd.print((millis()/millisFactor - s)*100/brewTime);
+        lcd.print("%");
+      }
+      if (((millis()/millisFactor - s)*100/brewTime) >= 100 && flag != 2){ //coffee is ready
+        flag = 1; 
+        lcd.setCursor(0,0);
+        lcd.print("Coffee is Ready!");
+        lcd.setCursor(0,1);
+        lcd.print("Age:");
+        lcd.print(millis()/millisFactor - s - brewTime);
+        lcd.print("sec     ");
+        if (music == false){  //plays vader theme once
+         vader();
+         music = true;
+        }
       }
     }
   }
 }
-  
 
+const int c = 261;
+const int d = 294;
+const int e = 329;
+const int f = 349;
+const int g = 391;
+const int gS = 415;
+const int a = 440;
+const int aS = 455;
+const int b = 466;
+const int cH = 523;
+const int cSH = 554;
+const int dH = 587;
+const int dSH = 622;
+const int eH = 659;
+const int fH = 698;
+const int fSH = 740;
+const int gH = 784;
+const int gSH = 830;
+const int aH = 880;
+ 
+
+
+ 
+int counter = 0;
+ 
+void vader()
+{
+ 
+  //Play first section
+  firstSection();
+ 
+  //Play second section
+  secondSection();
+ 
+  //Variant 1
+  beep(f, 250);  
+  beep(gS, 500);  
+  beep(f, 350);  
+  beep(a, 125);
+  beep(cH, 500);
+  beep(a, 375);  
+  beep(cH, 125);
+  beep(eH, 650);
+ 
+  delay(500);
+ 
+  //Repeat second section
+  secondSection();
+ 
+  //Variant 2
+  beep(f, 250);  
+  beep(gS, 500);  
+  beep(f, 375);  
+  beep(cH, 125);
+  beep(a, 500);  
+  beep(f, 375);  
+  beep(cH, 125);
+  beep(a, 650);  
+ 
+  delay(650);
+  return;
+}
+ 
+void beep(int note, int duration)
+{
+  //Play tone on buzzerPin
+  tone(buzzerPin, note, duration);
+ 
+  //Play different LED depending on value of 'counter'
+  if(counter % 2 == 0)
+  {
+
+    delay(duration);
+
+  }else
+  {
+
+    delay(duration);
+
+  }
+ 
+  //Stop tone on buzzerPin
+  noTone(buzzerPin);
+ 
+  delay(50);
+ 
+  //Increment counter
+  counter++;
+}
+ 
+void firstSection()
+{
+  beep(a, 500);
+  beep(a, 500);    
+  beep(a, 500);
+  beep(f, 350);
+  beep(cH, 150);  
+  beep(a, 500);
+  beep(f, 350);
+  beep(cH, 150);
+  beep(a, 650);
+ 
+  delay(500);
+ 
+  beep(eH, 500);
+  beep(eH, 500);
+  beep(eH, 500);  
+  beep(fH, 350);
+  beep(cH, 150);
+  beep(gS, 500);
+  beep(f, 350);
+  beep(cH, 150);
+  beep(a, 650);
+ 
+  delay(500);
+}
+ 
+void secondSection()
+{
+  beep(aH, 500);
+  beep(a, 300);
+  beep(a, 150);
+  beep(aH, 500);
+  beep(gSH, 325);
+  beep(gH, 175);
+  beep(fSH, 125);
+  beep(fH, 125);    
+  beep(fSH, 250);
+ 
+  delay(325);
+ 
+  beep(aS, 250);
+  beep(dSH, 500);
+  beep(dH, 325);  
+  beep(cSH, 175);  
+  beep(cH, 125);  
+  beep(b, 125);  
+  beep(cH, 250);  
+ 
+  delay(350);
+}
+  
