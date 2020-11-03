@@ -1,0 +1,90 @@
+/*
+  Relay activated Mr Coffee Timer
+  Alexander de Dood
+  adedood@gmail.com
+  
+  This project allows automatic brewing of a Mr Coffee coffee maker after a set delay
+  Wiring of the relay in this design should be in parrallel to the switch on the front
+  of the coffee maker.
+  
+  A saftey switch should also be installed in series with the relay to disable
+  the heating implement when not desired.
+  
+  Relay should be wired in NC configuration.
+*/
+#include <LiquidCrystal.h>
+
+#define RS 12
+#define EN 11
+#define D4 4
+#define D5 5
+#define D6 6
+#define D7 7
+#define RELAY 3
+#define INCREMENT 2
+LiquidCrystal lcd(RS,EN,D4,D5,D6,D7);
+
+void setup() {
+    pinMode(INCREMENT, INPUT);
+    pinMode(RELAY,OUTPUT);
+    lcd.begin(16,2);
+}
+
+int maxBrewTime = 30;    //Coffee pot will stay on for 2 hours (72000 seconds)
+int incrementTime = 60;  //30 min (1800 seconds) increment when button is pressed
+
+int millisFactor = 1000;
+int s = 30;                //initial timer value
+int scdown;
+int enableBrew = 0;
+
+
+void loop() {
+  
+  if (enableBrew == 0){
+    lcd.setCursor(0,0);
+    lcd.print("Coffee in:      ");
+    while ((s - (millis()/millisFactor)) >= 1){
+      if(digitalRead(INCREMENT) == HIGH){
+        s = s+incrementTime;
+        delay(millisFactor);
+      }
+      lcd.setCursor(0,1);
+      scdown = s - (millis()/millisFactor);
+      if(scdown < 10){
+        lcd.print("0");
+        lcd.print(scdown);
+      }else{
+        lcd.print(scdown);
+      }
+    } //countdown to 1
+    enableBrew = 1;
+    digitalWrite(RELAY, HIGH);
+  }else {
+    if(digitalRead(INCREMENT) == HIGH){                     //Pressing the button will cancel brewing
+      lcd.setCursor(0,0);
+      lcd.print("Canceled Brew   ");
+      enableBrew = 0;
+      digitalWrite(RELAY, LOW);
+      delay(millisFactor);
+    }
+    else{
+      if((millis()/millisFactor - s) >= maxBrewTime){       //coffee has brewed until maxBrewTime
+        lcd.setCursor(0,0);
+        lcd.print("Coffee Timeout!");
+        lcd.setCursor(0,1);
+        lcd.print(millis()/millisFactor - s);
+        digitalWrite(RELAY,LOW);
+        enableBrew = 0;
+      }
+      else{                                                 //Coffee is brewing
+        lcd.setCursor(0,0);
+        lcd.print("Brewing Coffee!");
+        lcd.setCursor(0,1);
+        lcd.print(millis()/millisFactor - s);
+      }
+    }
+  }
+}
+  
+
