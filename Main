@@ -36,11 +36,11 @@ void setup() {
 }
 
 const long maxBrewTime = 14400;    //Coffee pot will stay on for 4 hours (14400 seconds)
-const long brewTime = 16000;         //Estimate the time it takes for a pot to brew, when its ready this will play Vader's theme. (30min = 16000)
+const long brewTime = 600;         //Estimate the time it takes for a pot to brew, when its ready this will play Vader's theme. (30min = 16000)(10min = 600s)
 const long incrementTime = 1800;  //30 min (1800 seconds) increment when button is pressed
 
 const int millisFactor = 1000;
-long s = 30;                //initial timer value
+long s = 5;                //initial timer value
 int scdown;
 int enableBrew = 0;
 bool music = false;
@@ -90,7 +90,7 @@ void loop() {
         lcd.print(millis()/millisFactor - s);
         lcd.print("/");
         lcd.print(brewTime);
-        lcd.print(" ");
+        lcd.print("sec ");
         lcd.print((millis()/millisFactor - s)*100/brewTime);
         lcd.print("%");
       }
